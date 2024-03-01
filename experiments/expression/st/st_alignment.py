@@ -19,13 +19,8 @@ from util import ( # in gpsa, util
     rbf_kernel,
 )
 
-# from models.gpsa_vi_lmc import VariationalWarpGP
-# from plotting.callbacks import callback_oned, callback_twod, callback_twod_aligned_only
 from gpsa import VariationalGPSA, matern12_kernel, rbf_kernel
 from gpsa.plotting import callback_twod
-
-# sys.path.append("../../../data/st/")
-# from st.load_st_data import load_st_data
 
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import WhiteKernel, RBF
@@ -42,7 +37,6 @@ import matplotlib.patches as mpatches
 
 from sklearn.neighbors import NearestNeighbors, KNeighborsRegressor
 from sklearn.metrics import r2_score
-
 
 def scale_spatial_coords(X, max_val=10.0):
     X = X - X.min(0)
@@ -68,81 +62,42 @@ PRINT_EVERY = 25
 
 
 def process_data(adata, n_top_genes=2000):
-    # print(adata.var_names)
-
     adata.var_names_make_unique()
-    # print(adata.var_names)
-
-    # print(adata.var.index.is_unique)
-    # print(adata.var_names.is_unique)
-    # pbmc.var["mito"] = pbmc.var_names.str.startswith("MT-")
-    # sc.pp.calculate_qc_metrics(pbmc, qc_vars=["mito"], inplace=True)
-    adata.var["mito"] = adata.var_names.str.startswith("MT-")
-    # print("1")
-    sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], inplace=True) #brew install miniforge
-
-    # print("1")
-    # sc.pp.filter_cells(adata, min_counts=100) #this used to be uncommented but this causes issues with mismatch between gene count matrix and spatial coordinates
-    # sc.pp.filter_cells(adata, max_counts=35000)
-    # adata = adata[adata.obs["pct_counts_mt"] < 20]
-    # sc.pp.filter_genes(adata, min_cells=10)
-
+    adata.var["mito"] = adata.var_names.str.startswith("MT-") #or mt
+    sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], inplace=True) # brew install miniforge
     sc.pp.normalize_total(adata, inplace=True)
     sc.pp.log1p(adata)
     sc.pp.highly_variable_genes(
         adata, flavor="seurat", n_top_genes=n_top_genes, subset=True
     )
     return adata
-# print(os.getcwd())
-# sys.path.append("../../../data/st/")
-# print(os.getcwd())
+
 data_slice1, data_slice2, data_slice3, data_slice4 = sc.read_10x_h5("../../../data/st/151673_raw_feature_bc_matrix.h5"), \
 sc.read_10x_h5("../../../data/st/151674_raw_feature_bc_matrix.h5"), \
 sc.read_10x_h5("../../../data/st/151675_raw_feature_bc_matrix.h5"), \
-sc.read_10x_h5("../../../data/st/151676_raw_feature_bc_matrix.h5") #gives rise to user warning
-# data_slice1 = sc.read_10x_h5("../../../data/st/151673_raw_feature_bc_matrix.h5")
-# data_slice1.var_names_make_unique()
-# data_slice2 = sc.read_10x_h5("../../../data/st/151674_raw_feature_bc_matrix.h5")
-# data_slice2.var_names_make_unique()
-# data_slice3 = sc.read_10x_h5("../../../data/st/151675_raw_feature_bc_matrix.h5")
-# data_slice3.var_names_make_unique()
-# data_slice4 = sc.read_10x_h5("../../../data/st/151676_raw_feature_bc_matrix.h5")
-# data_slice4.var_names_make_unique()
-
-# load_st_data( #only uses images
-# load_st_data( #only uses images
-# load_st_data( #only uses images
-#     layers=np.arange(N_LAYERS) + 1
-# )
-# data_slice1.var_names_make_unique()
-# data_slice2.var_names_make_unique()
-# data_slice3.var_names_make_unique()
-# data_slice4.var_names_make_unique()
+sc.read_10x_h5("../../../data/st/151676_raw_feature_bc_matrix.h5") #gives rise to user warning, can ignore
 
 process_data(data_slice1, n_top_genes=3000)
 process_data(data_slice2, n_top_genes=3000)
 process_data(data_slice3, n_top_genes=3000)
 process_data(data_slice4, n_top_genes=3000) 
 # fixed issue with sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], inplace=True) by using miniforge
-print(data_slice1.shape)
-print(data_slice2.shape)
-print(data_slice3.shape)
-print(data_slice4.shape)
+print("Shape of slice 1:", data_slice1.shape)
+print("Shape of slice 2:", data_slice2.shape)
+print("Shape of slice 3:", data_slice3.shape)
+print("Shape of slice 4:", data_slice4.shape)
 
 s1 = pd.read_csv("../../../data/st/tissue_positions_list3.csv",sep=",",header=None,na_filter=False,index_col=0) 
 s2 = pd.read_csv("../../../data/st/tissue_positions_list4.csv",sep=",",header=None,na_filter=False,index_col=0) 
 s3 = pd.read_csv("../../../data/st/tissue_positions_list5.csv",sep=",",header=None,na_filter=False,index_col=0) 
 s4 = pd.read_csv("../../../data/st/tissue_positions_list6.csv",sep=",",header=None,na_filter=False,index_col=0) 
-print(s1.shape)
-print(s2.shape)
-print(s3.shape)
-print(s4.shape)
-print('ds1,',data_slice1)
-# pip install venny4py
+print("Shape of spatial 1:", s1.shape)
+print("Shape of spatial 1:", s2.shape)
+print("Shape of spatial 1:", s3.shape)
+print("Shape of spatial 1:", s4.shape)
 
 from venny4py.venny4py import *
 
-#dict of sets
 sets = {
     'Slice_1': set(data_slice1.var['gene_ids']),
     'Slice_2': set(data_slice2.var['gene_ids']),
@@ -151,11 +106,13 @@ sets = {
     
 venny4py(sets=sets)
 plt.close()
+
 # print(s1.iloc[:, 3:5].to_numpy())
 data_slice1.obsm["spatial"]= s1.iloc[:, 3:5].to_numpy()
 data_slice2.obsm["spatial"]= s2.iloc[:, 3:5].to_numpy()
 data_slice3.obsm["spatial"]= s3.iloc[:, 3:5].to_numpy()
 data_slice4.obsm["spatial"]= s4.iloc[:, 3:5].to_numpy()
+
 ## Save original data
 plt.figure(figsize=(20, 5))
 
@@ -179,8 +136,7 @@ data_slice3.obs['batch'] = 2
 data_slice4.obs['batch'] = 3
 
 data = anndata.concat([data_slice1, data_slice2, data_slice3, data_slice4], join="inner",merge="same") # they used deprecated version
-
-#inner is right
+# inner is right, outer will break code
 
 # plt.figure(figsize=(5, 5))
 # plt.scatter(data[data.obs["batch"] == "0"].obsm["spatial"][:, 0], data[data.obs["batch"] == "0"].obsm["spatial"][:, 1])
@@ -192,7 +148,6 @@ data = anndata.concat([data_slice1, data_slice2, data_slice3, data_slice4], join
 data.obs_names_make_unique()
 shared_gene_names = data.var['gene_ids'].index.values #data.var.gene_ids.index.values
 print("important",len(shared_gene_names))
-# print(data_slice1.shape)
 data_knn = data_slice1[:, shared_gene_names]
 print("SHAPE",data_knn.shape)
 
@@ -210,15 +165,6 @@ Y_knn_centered = Y_knn - np.full(Y_knn.shape, Y_mean)
 Y_knn = Y_knn_centered / Y_std
 Y_knn = np.asarray(Y_knn)
 
-# print("knn",Y_knn)
-# Y_std = np.std(Y_knn)
-# Normalize the sparse matrix
-# Y_knn = (Y_knn - Y_mean) / Y_std
-# print("Y", Y_knn)
-# print(data_knn)
-# Y_knn = (Y_knn - Y_knn.mean(0)) / Y_knn.std(0)
-# nbrs = NearestNeighbors(n_neighbors=2).fit(X_knn)
-# distances, indices = nbrs.kneighbors(X_knn)
 knn = KNeighborsRegressor(n_neighbors=10, weights="uniform").fit(X_knn, Y_knn)
 preds = knn.predict(X_knn)
 
@@ -226,8 +172,7 @@ r2_vals = r2_score(Y_knn, preds, multioutput="raw_values")
 
 # sort this out later?
 print("r2",r2_vals)
-gene_idx_to_keep = np.where(r2_vals > 0.1)[0] #changed to 0.1
-# print(np.where(r2_vals > 0.3)) #changed to 0.1
+gene_idx_to_keep = np.where(r2_vals > 0.1)[0] # changed to 0.1
 print("gene_idx_to_keep", gene_idx_to_keep)
 N_GENES = min(N_GENES, len(gene_idx_to_keep))
 print("help2", N_GENES)
@@ -242,7 +187,6 @@ print("ngenes",data.shape)
 # for ii, gene_name in enumerate(gene_names_to_keep):
 #     print(r2_vals_sorted[ii], flush=True)
 #     sc.pl.spatial(data_knn, img_key=None, color=[gene_name], spot_size=1)
-
 
 n_samples_list = [
     data_slice1.shape[0],
@@ -261,7 +205,6 @@ Y_list = []
 print(data)
 for vv in range(n_views):
     # curr_X = np.array(data[data.obs.batch == str(vv)].obsm["spatial"]) THIS OLD LINE LEADS TO ERROR, can't call batch like that.
-    
     curr_X = np.array(data[data.obs["batch"] == vv].obsm["spatial"]) 
     print("x", curr_X)
     # print(vv)
@@ -283,13 +226,7 @@ for vv in range(n_views):
     curr_Y = np.asarray(curr_Y)
     # curr_Y = (curr_Y - curr_Y.mean(0)) / np.std(curr_Y.toarray())
     print("curr",curr_Y)
-# Y_mean = np.mean(Y_knn)
-# Y_knn_dense = Y_knn.toarray()
-# Y_std = np.std(Y_knn_dense)
-# Y_knn_centered = Y_knn - np.full(Y_knn.shape, Y_mean)
-
-# # Divide by the standard deviation
-# Y_knn = Y_knn_centered / Y_std
+    
     X_list.append(curr_X)
     Y_list.append(curr_Y)
 
