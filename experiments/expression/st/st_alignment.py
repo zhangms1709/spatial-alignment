@@ -224,9 +224,8 @@ for vv in range(n_views):
     # Divide by the standard deviation
     curr_Y = curr_Y_centered / Y_std
     curr_Y = np.asarray(curr_Y)
-    # curr_Y = (curr_Y - curr_Y.mean(0)) / np.std(curr_Y.toarray())
     print("curr",curr_Y)
-    
+
     X_list.append(curr_X)
     Y_list.append(curr_Y)
 
@@ -296,7 +295,9 @@ fig = plt.figure(figsize=(10, 5), facecolor="white", constrained_layout=True)
 ax1 = fig.add_subplot(121, frameon=False)
 ax2 = fig.add_subplot(122, frameon=False)
 print("hi") #https://stackoverflow.com/questions/28269157/plotting-in-a-non-blocking-way-with-matplotlib
-plt.show(block=False) #used to be False. True shows you axes, but setting block to true makes it stop running
+plt.ion()
+plt.show(block=False)
+# plt.show(block=False) #used to be False. True shows you axes, but setting block to true makes it stop running
 
 gene_idx = 0
 
@@ -331,19 +332,20 @@ for t in range(N_EPOCHS):
         print("where am I stuck?3")
 
         plt.draw()
-        plt.savefig("st_alignment.png")
+        plt.show()
+        plt.savefig("st_alignment1.png")
         plt.pause(1 / 60.0)
         print("where am I stuck?4")
 
-        pd.DataFrame(curr_aligned_coords).to_csv("aligned_coords_st.csv")
-        pd.DataFrame(view_idx["expression"]).to_csv("view_idx_st.csv")
-        pd.DataFrame(X).to_csv("X_st.csv")
-        pd.DataFrame(Y).to_csv("Y_st.csv")
-        data.write("data_st.h5")
+        # pd.DataFrame(curr_aligned_coords).to_csv("aligned_coords_st.csv")
+        # pd.DataFrame(view_idx["expression"]).to_csv("view_idx_st.csv")
+        # pd.DataFrame(X).to_csv("X_st.csv")
+        # pd.DataFrame(Y).to_csv("Y_st.csv")
+        # data.write("data_st.h5")
 
-        if model.n_latent_gps["expression"] is not None:
-            curr_W = model.W_dict["expression"].detach().numpy()
-            pd.DataFrame(curr_W).to_csv("W_st.csv")
-        print("where am I stuck?5")
+        # if model.n_latent_gps["expression"] is not None:
+        #     curr_W = model.W_dict["expression"].detach().numpy()
+        #     pd.DataFrame(curr_W).to_csv("W_st.csv")
+        # print("where am I stuck?5")
 
 plt.close()
