@@ -303,17 +303,16 @@ gene_idx = 0
 
 for t in range(N_EPOCHS):
     loss, G_means = train(model, model.loss_fn, optimizer)
-    print(t % PRINT_EVERY) #always printing 1?, now 2
+    print(t % PRINT_EVERY)
     if t % PRINT_EVERY == 0:
         print("Iter: {0:<10} LL {1:1.3e}".format(t, -loss), flush=True)
         ax1.cla()
         ax2.cla()
-        print("where am I stuck?1")
+
         curr_aligned_coords = G_means["expression"].detach().numpy()
         curr_aligned_coords_slice1 = curr_aligned_coords[view_idx["expression"][0]]
         curr_aligned_coords_slice2 = curr_aligned_coords[view_idx["expression"][1]]
         curr_aligned_coords_slice3 = curr_aligned_coords[view_idx["expression"][2]]
-        print("where am I stuck?2")
 
         for vv, curr_X in enumerate(X_list):
             ax1.scatter(curr_X[:, 0], curr_X[:, 1], alpha=0.5,s=1)
@@ -329,13 +328,11 @@ for t in range(N_EPOCHS):
                 curr_aligned_coords[view_idx["expression"][vv]][:, 1],
                 alpha=0.5,s=1
             )
-        print("where am I stuck?3")
 
         plt.draw()
-        plt.show()
+        # plt.show()
         plt.savefig("st_alignment1.png")
         plt.pause(1 / 60.0)
-        print("where am I stuck?4")
 
         # pd.DataFrame(curr_aligned_coords).to_csv("aligned_coords_st.csv")
         # pd.DataFrame(view_idx["expression"]).to_csv("view_idx_st.csv")
